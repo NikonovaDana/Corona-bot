@@ -1,7 +1,7 @@
 start:
-  remember responses_20200330 = {
+  remember answer_bot = {
     "FIN1": {
-      "name": "orientation_moins_de_15_ans",
+      "name": "orientation_moins_de_14_ans",
       "content": [
         "Это приложение не для людей в возрасте до 14 лет.Свяжитесь с вашим врачом общей практики, если у вас есть сомнения. В экстренных случаях звоните "
       ]

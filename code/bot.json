@@ -12,12 +12,17 @@
       "tags": []
     },
     {
-      "name": "main_algo",
+      "name": "answer_bot",
       "commands": [],
       "tags": []
     },
     {
-      "name": "responses_20200330",
+      "name": "main",
+      "commands": [],
+      "tags": []
+    },
+    {
+      "name": "main_algo",
       "commands": [],
       "tags": []
     }
