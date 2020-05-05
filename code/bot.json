@@ -1,0 +1,28 @@
+{
+  "id": "8fb83b65-710b-4aa8-b1ac-53203d80e374",
+  "name": "test000",
+  "description": null,
+  "default_flow": "000",
+  "tags": [],
+  "flows": [
+    {
+      "name": "000",
+      "description": "Default custom flow",
+      "commands": [],
+      "tags": []
+    },
+    {
+      "name": "main_algo",
+      "commands": [],
+      "tags": []
+    },
+    {
+      "name": "responses_20200330",
+      "commands": [],
+      "tags": []
+    }
+  ],
+  "files": [],
+  "functions": [],
+  "apps": []
+}

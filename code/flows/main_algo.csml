@@ -1,0 +1,252 @@
+start:
+	goto checkResponses
+
+checkResponses:
+	if (!responses_20200330) goto flow responses_20200330
+	goto algo
+
+algo:
+	
+	/*remember algo_version = "2020-03-30"
+	remember form_version = "2020-04-08"
+	if (starting_ts && ending_ts) {
+		remember date = starting_ts.iso
+		remember duration = ending_ts.unix.to_float() / 1000 - starting_ts.unix.to_float() / 1000
+	}*/
+
+
+	if (age < 15) remember age_range = "inf_15"
+	else if (age >= 15 && age <= 49) remember age_range = "from_15_to_49"
+	else if (age >= 50 && age <= 69) remember age_range = "from_50_to_69"
+	else if (age >= 70) remember age_range = "sup_70"
+	else remember age_range = "N/A"
+
+	if (temp > 0 && temp < 35.5) remember temperature_cat = "inf_35.5"
+	else if (temp >= 35.5 && temp <= 37.7) remember temperature_cat = "35.5-37.7"
+	else if (temp > 37.7 && temp < 39) remember temperature_cat = "37.8-38.9"
+	else if (temp >= 39) remember temperature_cat = "sup_39"
+	else remember temperature_cat = "NSP"
+
+	if (fever == 999 || (fever == 1 && (temperature_cat == "inf_35.5" || temperature_cat == "sup_39" || temperature_cat == "NSP"))) {
+		remember fever_algo = true
+	} else remember fever_algo = false
+
+	do sizem = size.to_float() / 100
+	do sizem2 = sizem.pow(2)
+	remember imc = weight.to_float() / sizem2
+	
+	if (heart_disease == 1 || heart_disease == 999) remember heart_disease_algo = true
+	else remember heart_disease_algo = false
+
+	if (immunosuppressant_disease == 1) remember immunosuppressant_disease_algo = true
+	else remember immunosuppressant_disease_algo = false
+	
+	if (immunosuppressant_drug == 1) remember immunosuppressant_drug_algo = true
+	else remember immunosuppressant_drug_algo = false
+
+	
+	do fgmineurs = 0
+	if (temp >= 39) do fgmineurs = fgmineurs + 1
+	if (temp <= 35.4 && temp > 0) do fgmineurs = fgmineurs + 1
+	if (tiredness_details == true) do fgmineurs = fgmineurs + 1
+
+
+	do fgmajeurs = 0
+	if (breathlessness == true) do fgmajeurs = fgmajeurs + 1
+	if (feeding_day == true) do fgmajeurs = fgmajeurs + 1
+
+	do hasNoPronosticFactors = (imc <= 30 &&
+		heart_disease_algo == false &&
+		diabetes == false &&
+		cancer == false &&
+		breathing_disease == false &&
+		kidney_disease == false &&
+		liver_disease == false &&
+		pregnant != 1 &&
+		immunosuppressant_disease_algo != true &&
+		immunosuppressant_drug_algo != true)
+
+
+	if (fever_algo == false &&
+		cough == false &&
+		sore_throat_aches == false &&
+		diarrhea == false &&
+		tiredness == false &&
+		feeding_day == false &&
+		breathlessness == false
+	) do symptomsLevel = 0
+
+
+	if (fever_algo == false &&
+		(cough == true && sore_throat_aches == false && agueusia_anosmia == false) ||
+		(cough == false && sore_throat_aches == true && agueusia_anosmia == false) ||
+		(cough == false && sore_throat_aches == false && agueusia_anosmia == true)) {
+		do symptomsLevel = 1
+	}
+
+
+	if (fever_algo == true ||
+		(cough == true && sore_throat_aches == true) ||
+		(cough == true && agueusia_anosmia == true) ||
+		(diarrhea == true)
+	) do symptomsLevel = 2
+
+	
+	if (temp > 37.7 && cough == true) do symptomsLevel = 3
+
+
+
+	if (age < 15) {
+	
+		remember orientation = responses_20200330.FIN1.name
+		foreach (message) in responses_20200330.FIN1.content {
+			say message
+		}
+		goto final
+	}
+
+
+	if (fgmajeurs > 0) {
+		
+		remember orientation = responses_20200330.FIN5.name
+		foreach (message) in responses_20200330.FIN5.content {
+			say message
+		}
+		goto final
+
+	}
+
+	
+	if (symptomsLevel == 3) {
+		
+		if (hasNoPronosticFactors == true) {
+	
+			remember orientation = responses_20200330.FIN6.name
+			foreach (message) in responses_20200330.FIN6.content {
+				say message
+			}
+			goto final
+		}
+	
+		if (hasNoPronosticFactors == false) {
+		
+			if (fgmineurs <= 1) {
+				
+				remember orientation = responses_20200330.FIN6.name
+				foreach (message) in responses_20200330.FIN6.content {
+					say message
+				}
+				goto final
+			}
+			
+			if (fgmineurs > 1) {
+				
+				remember orientation = responses_20200330.FIN4.name
+				foreach (message) in responses_20200330.FIN4.content {
+					say message
+				}
+				goto final
+			}
+		}
+	}
+
+
+	if (symptomsLevel == 2) {
+		
+		if (hasNoPronosticFactors == true) {
+		
+			if (fgmineurs == 0) {
+			
+				if (age < 50) {
+				
+					remember orientation = responses_20200330.FIN2.name
+					foreach (message) in responses_20200330.FIN2.content {
+						say message
+					}
+					goto final
+				} else {
+				
+					remember orientation = responses_20200330.FIN3.name
+					foreach (message) in responses_20200330.FIN3.content {
+						say message
+					}
+					goto final
+				}
+			}
+			
+			else if (fgmineurs >= 1) {
+				
+				remember orientation = responses_20200330.FIN3.name
+				foreach (message) in responses_20200330.FIN3.content {
+					say message
+				}
+				goto final
+			}
+		}
+
+		if (hasNoPronosticFactors == false) {
+		
+			if (fgmineurs < 2) {
+				
+				remember orientation = responses_20200330.FIN3.name
+				foreach (message) in responses_20200330.FIN3.content {
+					say message
+				}
+				goto final
+			}
+		
+			if (fgmineurs >= 2) {
+				
+				remember orientation = responses_20200330.FIN4.name
+				foreach (message) in responses_20200330.FIN4.content {
+					say message
+				}
+				goto final
+			}
+		}
+	}
+
+	
+	if (symptomsLevel == 1) {
+	
+		if (hasNoPronosticFactors == true) {
+
+			remember orientation = responses_20200330.FIN2.name
+			foreach (message) in responses_20200330.FIN2.content {
+				say message
+			}
+			goto final
+		} else {
+	
+			remember orientation = responses_20200330.FIN7.name
+			foreach (message) in responses_20200330.FIN7.content {
+				say message
+			}
+			goto final
+		}
+	}
+
+	
+	if (symptomsLevel == 0) {
+		
+		remember orientation = responses_20200330.FIN8.name
+		foreach (message) in responses_20200330.FIN8.content {
+			say message
+		}
+		goto final
+	}
+
+
+	foreach (message) in responses_20200330.ERR.content {
+		say message
+	}
+	goto final
+
+final:
+	
+  foreach (message) in responses_20200330.FINAL.content {
+		say message
+	}
+
+
+	goto end

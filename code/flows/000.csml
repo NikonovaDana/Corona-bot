@@ -1,0 +1,445 @@
+start:
+  say "Добро пожаловать в диагностический тест COVID-19"
+  say Typing(2000)
+	goto q1
+
+q1:
+	say Question(
+		"**1/20** : Был ли у вас жар в последние несколько дней (озноб, потливость)?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no,
+			Button("Я не знаю") as idk
+		])
+	hold
+	if (event match yes) {
+		remember fever = 1
+		goto q1add
+  } else if (event match idk) {
+    remember fever = 999
+    goto q2
+	} else if (event match no) {
+		remember fever = 0
+		remember temp = 0
+		goto q2
+	} else {
+		say  "Пожалуйста, нажмите на одну из кнопок"
+		goto q1
+	}
+
+q1add:
+	say "**1add/20** : Какая у вас была самая **температура** за эти дни (например: 38)?"
+	hold
+	do string=event as parsedTemp
+	if (!parsedTemp) {
+		say "Пожалуйста, введите корректную температуру"
+		goto q1add
+	}
+	if (parsedTemp.is_number() && parsedTemp >= 34 && parsedTemp <= 42) {
+		remember temp = parsedTemp
+		goto q2
+	} else {
+		say "Пожалуйста, введите корректную температуру от 34 до 42 градусов"
+		goto q1add
+	}
+
+q2:
+	say Question(
+		"**2/20** : Был ли у вас **кашель** в последнии несколько дней?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember cough = true
+		goto q3
+	} else if (event match no) {
+		remember cough = false
+		goto q3
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q2
+	}
+
+q3:
+	say Question(
+		"**3/20** : В последние дни заметили ли вы **резкое снижение или потерю вкуса или запаха**? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember agueusia_anosmia = true
+		goto q4
+	} else if (event match no) {
+		remember agueusia_anosmia = false
+		goto q4
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q3
+	}
+
+
+q4:
+	say Question(
+		"**4/20** : Были у вас **боли в горле** или **мышечные боли** в последние несколько дней? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember sore_throat_aches = true
+		goto q5
+	} else if (event match no) {
+		remember sore_throat_aches = false
+		goto q5
+	} else {
+		say  "Пожалуйста, нажмите на одну из кнопок"
+		goto q4
+	}
+
+q5:
+	say Question(
+		"**5/20** : За последние 24 часа была ли у вас **диарея**? (по крайней мере, с 3 жидких стула) ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember diarrhea = true
+		goto q6
+	} else if (event match no) {
+		remember diarrhea = false
+		goto q6
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q5
+	}
+
+q6:
+	say Question(
+		"**6/20** : В последние несколько дней вы чувствовали **необычную усталость**? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember tiredness = true
+		goto q6add
+	} else if (event match no) {
+		remember tiredness = false
+		remember tiredness_details = false
+		goto q7
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q6
+	}
+
+q6add:
+	say Question(
+		"**6add/20** : Приходится ли вам отдыхать более половины дня из-за этой усталости?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember tiredness_details = true
+		goto q7
+	} else if (event match no) {
+		remember tiredness_details = false
+		goto q7
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q6add
+	}
+
+q7:
+	say Question(
+		"**7/20** : Вы не можете есть или пить **в течение 24 часов или больше**?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember feeding_day = true
+		goto q8
+	} else if (event match no) {
+		remember feeding_day = false
+		goto q8
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q7
+	}
+
+q8:
+	say Question(
+		"**8/20** : За последние 24 часа вы замечали **необычную одышку**, когда разговаривали или совершали физические нагрузки? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember breathlessness = true
+		goto q9
+	} else if (event match no) {
+		remember breathlessness = false
+		goto q9
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q8
+	}
+
+q9:
+	say "**9/20** : Сколько вам **лет**? (например: 28)"
+	hold
+	do string=event as parsedAge
+	if (!parsedAge) {
+		say "Пожалуйста, введите корректный возраст"
+		goto q9
+	}
+	if (parsedAge.is_number() && parsedAge > 14 && parsedAge <= 110) {
+		remember age = parsedAge
+		goto q10
+	} else if (parsedAge <= 14 && parsedAge >= 0) {
+		say "К сожалению, это чат-бот не предназначен  для пользователей вашего возраста. Вам следует обратиться к врачу общей практики. В экстренных случаях звоните по телефону 103."
+		goto end
+	} else if (parsedAge >= 100 && parsedAge <= 110) {
+		say "К сожалению, это чат-бот не предназначен  для пользователей вашего возраста. Вам следует обратиться к врачу общей практики. В экстренных случаях звоните по телефону 103."
+		goto end
+	} else {
+		say "Пожалуйста, введите корректный возраст"
+		goto q9
+	}
+
+q10:
+	say "**10/20** : Какой ваш **рост** в сантиметрах (напрмер: 175) ?"
+	hold
+	do string=event as parsedSize
+	if (!parsedSize) {
+		say "Пожалуйста, введите корректный рост, от 80 до 250 см."
+		goto q10
+	}
+	if (parsedSize < 10) do normSize = parsedSize * 100
+	else do normSize = parsedSize
+	if (normSize.is_number() && normSize >= 80 && normSize <= 250) {
+		remember size = normSize
+		goto q11
+	} else {
+		say "Пожалуйста, введите корректный рост, от 80 до 250 см."
+		goto q10
+	}
+
+q11:
+	say "**11/20** : Какой ваш **вес** в килограммах (например: 84) ? "
+	hold
+	do  string=event as parsedWeight
+	if (!parsedWeight) {
+		say "Пожалуйста, введите корректный вес, от 20 до 250 кг."
+		goto q11
+	}
+	if (parsedWeight.is_number() && parsedWeight >= 20 && parsedWeight <= 250) {
+		remember weight = parsedWeight
+		goto q12
+	} else {
+		say "Пожалуйста, введите корректный вес, от 20 до 250 кг."
+		goto q11
+	}
+
+q12:
+	say Question(
+		"**12/20** : . У вас есть нестабильно **высокое артериальное давление**? Или вы болеете **сердечными или сосудистыми заболеваниями**? Или вы **наблюдаетесь у кардиолога**? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no,
+			Button("Я не знаю") as idk
+		])
+	hold
+	if (event match yes) {
+		remember heart_disease = 1
+		goto q13
+	} else if (event match no) {
+		remember heart_disease = 0
+		goto q13
+	} else if (event match idk) {
+		remember heart_disease = 999
+		goto q13
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q12
+	}
+
+q13:
+	say Question(
+		"**13/20** : Вы **диабетик**?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember diabetes = true
+		goto q14
+	} else if (event match no) {
+		remember diabetes = false
+		goto q14
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q13
+	}
+
+q14:
+	say Question(
+		"**14/20** : Болели ли вы **раком** за последние 3 года?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember cancer = true
+		goto q15
+	} else if (event match no) {
+		remember cancer = false
+		goto q15
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q14
+	}
+
+q15:
+	say Question(
+		"**15/20** : Есть ли у вас **респираторные заболевания**? Или вы **наблюдаетесь у пульмонолога**?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember breathing_disease = true
+		goto q16
+	} else if (event match no) {
+		remember breathing_disease = false
+		goto q16
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q15
+	}
+
+q16:
+	say Question(
+		"**16/20** :  Находитесь ли вы на **диализе** ? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember kidney_disease = true
+		goto q17
+	} else if (event match no) {
+		remember kidney_disease = false
+		goto q17
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q16
+	}
+
+q17:
+	say Question(
+		"**17/20** : Есть ли у вас **хроническое заболевание почек**?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no
+		])
+	hold
+	if (event match yes) {
+		remember liver_disease = true
+		goto q18
+	} else if (event match no) {
+		remember liver_disease = false
+		goto q18
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q17
+	}
+
+q18:
+	say Question(
+		"**18/20** : Вы **беременны** ?",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no,
+			Button("Я не знаю") as idk
+		])
+	hold
+	if (event match yes) {
+		remember pregnant = 1
+		goto q19
+	} else if (event match no) {
+		remember pregnant = 0
+		goto q19
+	} else if (event match idk) {
+		remember pregnant = 888
+		goto q19
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q18
+	}
+
+q19:
+	say Question(
+		"**19/20** : Есть ли у вас заболевание, которое снижает вашу иммунную систему? ",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no,
+			Button("Я не знаю") as idk
+		])
+	hold
+	if (event match yes) {
+		remember immunosuppressant_disease = 1
+		goto q20
+	} else if (event match no) {
+		remember immunosuppressant_disease = 0
+		goto q20
+	} else if (event match idk) {
+		remember immunosuppressant_disease = 999
+		goto q20
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q19
+	}
+
+q20:
+	say Question(
+		"**20/20** : Вы принимаете **иммунодепрессанты**? Вот несколько примеров: кортикостероиды, метотрексат, циклоспорин, такролимус, азатиоприн, циклофосфамид и др.",
+		buttons=[
+			Button("Да") as yes,
+			Button("Нет") as no,
+			Button("Я не знаю") as idk
+		])
+	hold
+	if (event match yes) {
+		remember immunosuppressant_drug = 1
+		goto q21
+	} else if (event match no) {
+		remember immunosuppressant_drug = 0
+		goto q21
+	} else if (event match idk) {
+		remember immunosuppressant_drug = 999
+		goto q21
+	} else {
+		say "Пожалуйста, нажмите на одну из кнопок"
+		goto q20
+	}
+
+q21:
+	
+	goto flow main_algo
